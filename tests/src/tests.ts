@@ -1,5 +1,5 @@
 import * as pkg from '../..';
-import { range, sleep } from './util';
+import { range, setsAreEqual, sleep } from './util';
 
 export type Test = {
     name: string;
@@ -28,7 +28,7 @@ export const tests: Test[] = [
         f: async () => {
             let n = 10 + Math.floor(Math.random() * 10);
             let inputs = range(n).map(async i => {
-                await sleep(Math.random() * 10000);
+                await sleep(Math.random() * 5000);
                 if (i % 2 === 0) return i;
                 else throw i;
             });
@@ -42,7 +42,7 @@ export const tests: Test[] = [
 
             return undefined;
         },
-        timeout: 11
+        timeout: 6
     }, {
         name: 'iterateIgnoreRejections produces correct number of results [1]',
         f: async () => {
@@ -65,7 +65,7 @@ export const tests: Test[] = [
         f: async () => {
             let n = 10 + Math.floor(Math.random() * 10);
             let inputs = range(n).map(async i => {
-                await sleep(Math.random() * 10000);
+                await sleep(Math.random() * 5000);
                 if (i % 2 === 0) return i;
                 else throw i;
             });
@@ -81,7 +81,7 @@ export const tests: Test[] = [
 
             return undefined;
         },
-        timeout: 11
+        timeout: 6
     }, {
         name: 'iterateRejections produces correct number of results [1]',
         f: async () => {
@@ -104,7 +104,7 @@ export const tests: Test[] = [
         f: async () => {
             let n = 10 + Math.floor(Math.random() * 10);
             let inputs = range(n).map(async i => {
-                await sleep(Math.random() * 10000);
+                await sleep(Math.random() * 5000);
                 if (i % 2 === 0) return i;
                 else throw i;
             });
@@ -120,7 +120,7 @@ export const tests: Test[] = [
 
             return undefined;
         },
-        timeout: 11
+        timeout: 6
     }, {
         name: 'iterate produces correct result types [1]',
         f: async () => {
@@ -140,7 +140,7 @@ export const tests: Test[] = [
         f: async () => {
             let n = 10 + Math.floor(Math.random() * 10);
             let inputs = range(n).map(async i => {
-                await sleep(Math.random() * 10000);
+                await sleep(Math.random() * 5000);
                 if (i % 2 === 0) return i;
                 else throw i;
             });
@@ -153,6 +153,84 @@ export const tests: Test[] = [
 
             return undefined;
         },
-        timeout: 11
+        timeout: 6
+    }, {
+        name: 'iterate produces results in the correct order',
+        f: async () => {
+            let n = 10 + Math.floor(Math.random() * 10);
+            let inputs = range(n).map(async () => {
+                let t = Math.random() * 5000;
+                await sleep(t);
+                return t;
+            });
+
+            let previous = 0;
+
+            for await (let t of pkg.iterateUnsafe(inputs)) {
+                if (t < previous) return `Yielded value ${t} is less than previously yielded value ${previous}`;
+                previous = t;
+            }
+
+            return undefined;
+        },
+        timeout: 6
+    }, {
+        name: 'iterateUnsafe throws on error',
+        f: async () => {
+            let caught = false;
+
+            try {
+                for await (let value of pkg.iterateUnsafe([ Promise.resolve(), Promise.reject(), Promise.resolve() ])) {
+                    // Do nothing
+                }
+            }
+            catch (err) {
+                caught = true;
+            }
+
+            if (!caught) return 'No exception was thrown even though the input contained a rejected promise.';
+
+            caught = false;
+
+            try {
+                for await (let value of pkg.iterateUnsafe([ Promise.resolve(), Promise.resolve(), Promise.resolve() ])) {
+                    // Do nothing
+                }
+            }
+            catch (err) {
+                caught = true;
+            }
+
+            if (caught) return 'An exception was thrown even though the input did not contain a rejected promise.';
+
+            return undefined;
+        }
+    }, {
+        name: 'collect produces same set of results as Promise.all [1]',
+        f: async () => {
+            let n = 10 + Math.floor(Math.random() * 10);
+            let inputs = range(n).map(i => Promise.resolve(i));
+
+            let collected = new Set(await pkg.collect(pkg.iterateIgnoreRejections(inputs)));
+            let promiseAlled = new Set(await Promise.all(inputs));
+
+            if (!setsAreEqual(collected, promiseAlled)) return `Sets of returned values are not equal.`;
+
+            return undefined;
+        }
+    }, {
+        name: 'collect produces same set of results as Promise.all [2]',
+        f: async () => {
+            let n = 10 + Math.floor(Math.random() * 10);
+            let inputs = range(n).map(i =>  sleep(Math.random() * 5000).then(() => i));
+
+            let collected = new Set(await pkg.collect(pkg.iterateIgnoreRejections(inputs)));
+            let promiseAlled = new Set(await Promise.all(inputs));
+
+            if (!setsAreEqual(collected, promiseAlled)) return `Sets of returned values are not equal.`;
+
+            return undefined;
+        },
+        timeout: 6
     }
 ];

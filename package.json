@@ -7,7 +7,7 @@
   "files": ["out/index.js", "out/index.d.ts"],
   "scripts": {
     "make": "tsc",
-    "test": "tsc && cd tests && tsc && node out/index.js",
+    "test": "npm run make && cd tests && tsc && node out/index.js",
     "prepare": "npm run make"
   },
   "repository": {

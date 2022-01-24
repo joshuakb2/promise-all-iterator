@@ -43,7 +43,7 @@ export const iterate = <T>(promisesIter: Iterable<Promise<T>>): AsyncIterable<Pr
 
     const kick = () => {
         if (yieldNext) {
-            if (queue.length > 0 && yieldNext) {
+            if (queue.length > 0) {
                 yieldNext({ done: false, value: queue.shift()! });
                 yieldNext = undefined;
             }
@@ -72,3 +72,9 @@ export const iterate = <T>(promisesIter: Iterable<Promise<T>>): AsyncIterable<Pr
         }
     };
 };
+
+export const collect = async function<T>(values: AsyncIterable<T>): Promise<T[]> {
+    let r: T[] = [];
+    for await (let v of values) r.push(v);
+    return r;
+}
