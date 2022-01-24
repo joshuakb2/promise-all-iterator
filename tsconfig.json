@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "lib": [ "esnext" ],
+        "charset": "utf8",
+        "outDir": "out",
+        "target": "es2017",
+        "downlevelIteration": true,
+        "sourceMap": true,
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "incremental": true,
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "declaration": true
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
