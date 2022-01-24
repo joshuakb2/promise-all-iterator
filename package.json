@@ -1,6 +1,6 @@
 {
   "name": "promise-all-iterator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Takes a finite iterable of promises and returns an async iterable of their results in the order that they finish.",
   "main": "out/index.js",
   "types": "out/index.d.ts",
