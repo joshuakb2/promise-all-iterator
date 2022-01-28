@@ -13,6 +13,7 @@
         "incremental": true,
         "strict": true,
         "strictPropertyInitialization": false,
+        "strictNullChecks": true,
         "declaration": true
     },
     "include": [
